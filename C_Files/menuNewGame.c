@@ -1,113 +1,144 @@
 #include "mainMenu.h"
 
+void displayContainer(SDL_Renderer *render, int newIndex, int selection)
+{
+	SDL_Rect	shipsContainer;
+	SDL_Rect	detailsContainer;
+	SDL_Rect	confirmContainer;
+
+	shipsContainer = createRect(45, 10, 45, 70);
+	detailsContainer = createRect(10, 10, 25, 70);
+	confirmContainer = createRect(65, 85, 25, 10);
+
+	copyRectInRender(shipsContainer,1 ,render, GREY, 195);
+	drawContour(RED, 255, shipsContainer, render);
+	copyRectInRender(detailsContainer,1 ,render, GREY, 195);
+	drawContour(RED, 255, detailsContainer, render);
+	copyRectInRender(confirmContainer,1 ,render, GREY, 195);
+	if (newIndex == 6 || selection > -1)
+		drawContour(YELLOW, 255, confirmContainer, render);
+	else
+		drawContour(RED, 255, confirmContainer, render);
+}
+
+static void displayShips(SDL_Rect units,int index, SDL_Renderer *render)
+{
+	SDL_Rect	temp;
+	temp.x = units.x + percent(SCREEN_W, 5);
+	temp.y = units.y + percent(SCREEN_H, 4);
+	temp.w = percent(SCREEN_W, 5);
+	temp.h = percent(SCREEN_H, 4);
+	toColor(g_spaceShipArr[index].color, 255, render); 
+	SDL_RenderFillRect(render, &temp);
+}
+
+static SDL_Rect	nextUnits(SDL_Rect units, int *loop)
+{
+	int limitY;
+	int limitX;
+
+	limitY = percent(SCREEN_H, 10) + percent(SCREEN_H, 70);
+	limitX = percent(SCREEN_W, 45) + percent(SCREEN_W, 45);
+
+	units.x += units.w + percent(SCREEN_W, 5);
+	if (units.x + units.w + percent(SCREEN_W, 1) >= limitX)
+	{
+		units.x = percent(SCREEN_W, 50);
+		units.y += units.h + percent(SCREEN_H, 5);
+		if (units.y + units.h + percent(SCREEN_H, 5) >= limitY)
+			*loop = FALSE; 
+	}
+	return (units);
+}
+
+static SDL_Rect defineRect(int x, int y, int w, int h)
+{
+	SDL_Rect	temp;
+
+	temp.x = x;
+	temp.y = y;
+	temp.w = w;
+	temp.h = h;
+	return (temp);
+}
+
+static void backgroundAnimation(int newIndex, int max, SDL_Rect units, SDL_Renderer *render, SDL_Texture *texture)
+{
+	int 		startIndex;
+	static int	previousIndex;
+	static int	currentIndex;
+	SDL_Rect	src;
+	SDL_Rect	dst;
+
+	startIndex = 5;
+	src = defineRect(startIndex, 0, 5, 100);
+	dst = defineRect(units.x, units.y, 2, units.h);
+	if (previousIndex == newIndex)
+	{
+		startIndex = currentIndex;
+		src.x = currentIndex;
+		if (src.x >= max)
+		{	
+			src.x = 0;
+			currentIndex = 0;
+		}
+	}
+	while (dst.x < units.w + units.x)
+	{
+		SDL_RenderCopy(render, texture, &src, &dst);
+		src.x += 2;
+		dst.x += 2;
+		if (src.x >= max)
+			src.x = 0;
+	}
+	currentIndex += 2;
+	previousIndex = newIndex;
+}
+
+static void displayUnits(SDL_Renderer *render, int newIndex, int selection, SDL_Texture *background)
+{
+	SDL_Rect	units;
+	int			i;
+	int			loop;
+	int			max;
+
+	i = 0;
+	loop = TRUE;
+	units = createRect(50, 20, 15, 12);
+	SDL_QueryTexture(background, NULL, NULL, &max, NULL);
+	while(loop)
+	{
+		toColor(RED, 255, render);
+		if (i != newIndex)
+			SDL_RenderCopy(render, background, NULL, &units);
+		if (i == newIndex || i == selection)
+		{
+			backgroundAnimation(newIndex, max, units, render, background);
+			toColor(YELLOW,255, render);
+		}
+		SDL_RenderDrawRect(render, &units);
+		displayShips(units, i, render);
+		units = nextUnits(units, &loop);
+		i++;
+	}
+}
+
+static void setIndexAndSelection(int *newIndex, int *selection, int index)
+{
+	*newIndex = readBits(4, index);
+	*selection = -1;
+	if ((index & 0x80) == 0)
+		*selection = readBits(4, (index >> 4));
+}
 
 void displayNewGame(t_menuNewGame *param, SDL_Renderer *render, u_int32_t *menuStep, int *index)
 {
-	(void)param;
 	(void)menuStep;
-	(void)index;
-	SDL_Rect selectionBox;
-	SDL_Rect detailsBox;
-	SDL_Rect confirmBox;
-	SDL_Rect unitBox;
-	SDL_Rect spaceBox;
-
 	int selection;
 	int newIndex;
-	int limitX;
-	int limitY;
-	int i;
-	int max;
-	static int prevIndex;
-	int startIndex;
-	static int followIndex;
-	static SDL_Rect scr;
-	static SDL_Rect dest;
-
-	selection = -1;
-	newIndex = readBits(4, *index);
-	if ((*index & 0x80) == 0)
-		selection = readBits(4, (*index >> 4));
-	printf("Selection %d\n", selection);
-	startIndex = 5;
-	SDL_SetRenderDrawBlendMode(render, SDL_BLENDMODE_BLEND);
-	SDL_QueryTexture(param->background, NULL, NULL, &max, NULL);
-	unitBox.x = percent(SCREEN_W, 50);
-	unitBox.y = percent(SCREEN_H, 20);
-	unitBox.w = percent(SCREEN_W, 15);
-	unitBox.h = percent(SCREEN_H, 12);
-
-	selectionBox = createRect(45, 10, 45, 70);
-	detailsBox = createRect(10, 10, 25, 70);
-	confirmBox = createRect(65, 85, 25, 10);
-
-	toColor(GREY, 175, render);
-	SDL_RenderFillRect(render, &detailsBox);
-	SDL_RenderFillRect(render, &selectionBox);
-	SDL_RenderFillRect(render, &confirmBox);
-	toColor(RED, 255, render);
-	SDL_RenderDrawRect(render, &selectionBox);
-	SDL_RenderDrawRect(render, &detailsBox);
-	if (newIndex == 6 || selection > -1)
-			toColor(YELLOW, 255, render);
-	SDL_RenderDrawRect(render, &confirmBox);
-
 	
-	limitX = percent(SCREEN_W, 45) + percent(SCREEN_W, 45);
-	limitY = percent(SCREEN_H, 10) + percent(SCREEN_H, 70);
-	i = 0;
-	scr.y = 0;
-	scr.w = 5; 
-	scr.h = 100;
-	if (prevIndex == newIndex)
-	{
-		startIndex = followIndex;
-		scr.x = followIndex;
-		if (scr.x >= max)
-		{	scr.x = 0;
-			followIndex = 0;}
-	}
-	else
-		scr.x = startIndex;
-	while (1)
-	{
-		if (i != newIndex)
-			SDL_RenderCopy(render, param->background, NULL, &unitBox);
-		if (i == newIndex || selection == i)
-		{
-			dest.x = unitBox.x;
-			dest.y = unitBox.y;
-			dest.w = 2;
-			dest.h = unitBox.h;
-			toColor(YELLOW, 255, render);
-			while (dest.x < unitBox.w + unitBox.x)
-			{
-				SDL_RenderCopy(render, param->background, &scr, &dest);
-				scr.x += 2;
-				dest.x += 2;
-				if (scr.x >= max)
-					scr.x = 0;
-			}
-			followIndex += 2;
-		}
-		else
-			toColor(RED, 255, render);	
-		SDL_RenderDrawRect(render, &unitBox);
-		toColor(RED, 255, render);
-		spaceBox.x = unitBox.x + percent(SCREEN_W, 5);
-		spaceBox.y = unitBox.y + percent(SCREEN_H, 4);
-		spaceBox.w = percent(SCREEN_W, 5);
-		spaceBox.h = percent(SCREEN_H, 4);
-		SDL_RenderFillRect(render, &spaceBox);
-		unitBox.x += unitBox.w + percent(SCREEN_W, 5);
-		if (unitBox.x + unitBox.w + percent(SCREEN_W, 1) >= limitX)
-		{
-			unitBox.x = percent(SCREEN_W, 50);
-			unitBox.y += unitBox.h + percent(SCREEN_H, 5);
-			if (unitBox.y + unitBox.h + percent(SCREEN_H, 5) >= limitY)
-				break ; 
-		}
-		i++;
-	}
-	prevIndex = newIndex;
+	SDL_SetRenderDrawBlendMode(render, SDL_BLENDMODE_BLEND);
+	setIndexAndSelection(&newIndex, &selection, *index);
+	displayContainer(render, newIndex, selection);
+	displayUnits(render,newIndex, selection, param->background);
 }

@@ -32,6 +32,13 @@ enum menuPart {
 
 /*STRUCT*/
 
+typedef struct s_rectCoord {
+	int x;
+	int y;
+	int w;
+	int h;
+}			t_rectCoord;
+
 typedef struct	s_menuTitle {
 	SDL_Texture 			*background;
 	SDL_Texture 			*titre;
@@ -83,4 +90,5 @@ e_bool mainMenu(SDL_Renderer *render, u_int32_t *gameStep);
 void displayTitle(t_menuTitle *param, SDL_Renderer *render, t_timer fps, u_int32_t *menuStep);
 void displayMain(t_menuMain *param, SDL_Renderer *render, int index);
 void displayNewGame(t_menuNewGame *param, SDL_Renderer *render, u_int32_t *menuStep, int *index);
+void displayContainer(SDL_Renderer *render, int newIndex, int selection);
 #endif

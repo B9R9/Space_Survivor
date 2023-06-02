@@ -109,6 +109,11 @@ static void eventMenuNewGame(u_int32_t *menuStep, SDL_KeyboardEvent *event, int 
 		selection = readBits(4, (*index >> 4));
 	else
 		selection = -1;
+	if (selection > -1 && event->keysym.scancode > 78 && event->keysym.scancode < 83)
+	{	
+		i = selection;
+		selection = -1;
+	}
 	if (event->repeat == 0)
 	{
 		if (event->keysym.scancode == SDL_SCANCODE_ESCAPE)

@@ -230,3 +230,30 @@ void    toColor(const char *hexValue,int alphaValue, SDL_Renderer *render)
     color = colorConverter(hexConverter(hexValue), alphaValue);
     SDL_SetRenderDrawColor(render, color.r, color.g, color.b, color.a);
 }
+
+/**
+ * @brief copy a SDL RECT to render, You can fill the rectangle or not
+ * and select the color
+ * option 0: draw line only
+ * option 1: fill the rect
+ * 
+ * @param rect : SDL_Rect to copy
+ * @param fillRect: option to fill or not 
+ * @param render: rendu 
+ * @param color: char * hexvalue 
+ * @param alphaValue : opacity
+ */
+void copyRectInRender(SDL_Rect rect, int options, SDL_Renderer *render, char *color, int alphaValue)
+{
+	toColor(color, alphaValue, render);
+	if (options == 0)
+		SDL_RenderDrawRect(render, &rect);
+	if (options == 1)
+		SDL_RenderFillRect(render, &rect);	
+}
+
+void drawContour(char *color, int alphaValue, SDL_Rect rect, SDL_Renderer *render)
+{
+	toColor(color, alphaValue, render);
+	SDL_RenderDrawRect(render, &rect);
+}

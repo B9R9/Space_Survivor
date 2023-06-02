@@ -29,5 +29,5 @@ void displayTitle(t_menuTitle *param, SDL_Renderer *render, t_timer fps, u_int32
 		deltaTime = 1033;
 	animAsteroid(param->asteroid_t, &param->asteroid_l, render, deltaTime, param->impact_t);
 	if (*menuStep & transition && param->asteroid_l == NULL)
-		*menuStep = mainmenu;	
+		*menuStep = mainmenu;
 }

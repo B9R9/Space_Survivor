@@ -18,7 +18,7 @@ void errPrint(const char *location, const char *error)
  */
 e_bool run(u_int32_t gameSteps)
 {
-	if (gameSteps & 0x40)
+	if (gameSteps & 0x80)
 		return (FALSE);
 	return (TRUE);
 }

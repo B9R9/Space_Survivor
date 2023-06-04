@@ -102,7 +102,7 @@ static e_bool loadMenu(t_menuParam *param, SDL_Renderer *render)
 		return (FAIL);
 	if (loadNewGameParam(&param->new, render) == FAIL)
 		return (FAIL);
-	param->index = 0X80;	
+	param->index = 0X880;	
 	return (SUCCESS);
 }
 
@@ -122,7 +122,7 @@ static void dispachtMenu(u_int32_t   *menuStep,SDL_Renderer *render, t_menuParam
 	else if (*menuStep & newGame)
 		displayNewGame(&param->new, render, menuStep, &param->index);
 	else if (*menuStep & lvl)
-		printf ("lvl\n");
+		displayLvlSelection(render,param->index);
 	else if (*menuStep & option)
 		printf ("options\n");
 	else if (*menuStep & success)

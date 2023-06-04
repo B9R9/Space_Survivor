@@ -60,12 +60,12 @@ int readBits(int nbBits, int value)
 	int i;
 	int mask;
 
-	i = 1;
-	mask = 0;
+	i = 0x01;
+	mask = 0x00;
 	while (i <= nbBits)
 	{
 		mask += i;
-		i = i * 2;
+		i = i * 0x02;
 	}
 	return (value & mask);
 }

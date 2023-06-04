@@ -29,6 +29,7 @@ FILES 	:=	animAsteroid.c \
 			mainGame.c \
 			mainIntro.c \
 			mainMenu.c \
+			menulvl.c \
 			menuMain.c \
 			menuNewGame.c \
 			menuTitle.c \

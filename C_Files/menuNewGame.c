@@ -1,6 +1,6 @@
 #include "mainMenu.h"
 
-void displayContainer(SDL_Renderer *render, int newIndex, int selection)
+void displayContainer(SDL_Renderer *render, int newIndex, int selection, int indexConfirm)
 {
 	SDL_Rect	shipsContainer;
 	SDL_Rect	detailsContainer;
@@ -15,7 +15,7 @@ void displayContainer(SDL_Renderer *render, int newIndex, int selection)
 	copyRectInRender(detailsContainer,1 ,render, GREY, 195);
 	drawContour(RED, 255, detailsContainer, render);
 	copyRectInRender(confirmContainer,1 ,render, GREY, 195);
-	if (newIndex == 6 || selection > -1)
+	if (newIndex == indexConfirm || selection > -1)
 		drawContour(YELLOW, 255, confirmContainer, render);
 	else
 		drawContour(RED, 255, confirmContainer, render);
@@ -123,12 +123,16 @@ static void displayUnits(SDL_Renderer *render, int newIndex, int selection, SDL_
 	}
 }
 
-static void setIndexAndSelection(int *newIndex, int *selection, int index)
+void setIndexAndSelection(int *newIndex, int *selection, int index, int option)
 {
 	*newIndex = readBits(4, index);
 	*selection = -1;
-	if ((index & 0x80) == 0)
-		*selection = readBits(4, (index >> 4));
+	if (option == 0)
+		if ((index & 0x80) == 0)
+			*selection = readBits(4, (index >> 4));
+	if (option == 1)
+		if ((index & 0x800) == 0)
+			*selection = readBits(4, (index >> 8));
 }
 
 void displayNewGame(t_menuNewGame *param, SDL_Renderer *render, u_int32_t *menuStep, int *index)
@@ -138,7 +142,7 @@ void displayNewGame(t_menuNewGame *param, SDL_Renderer *render, u_int32_t *menuS
 	int newIndex;
 	
 	SDL_SetRenderDrawBlendMode(render, SDL_BLENDMODE_BLEND);
-	setIndexAndSelection(&newIndex, &selection, *index);
-	displayContainer(render, newIndex, selection);
+	setIndexAndSelection(&newIndex, &selection, *index, 0);
+	displayContainer(render, newIndex, selection, 6);
 	displayUnits(render,newIndex, selection, param->background);
 }

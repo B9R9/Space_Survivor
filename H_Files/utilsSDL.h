@@ -42,6 +42,7 @@ u_int32_t hexConverter(const char *hexvalue);
 void    toColor(const char *hexValue,int alphaValue, SDL_Renderer *render);
 
 SDL_Rect createRect(int x, int y, int w, int h);
+SDL_Rect defineRect(int x, int y, int w, int h);
 void copyRectInRender(SDL_Rect rect, int options, SDL_Renderer *render, char *color, int alphaValue);
 
 void drawContour(char *color, int alphaValue, SDL_Rect rect, SDL_Renderer *render);

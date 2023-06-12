@@ -57,14 +57,14 @@ static int setMenuNewGameIndex(int index, int scanCode, int jump, int maxIndex)
 	if (scanCode == SDL_SCANCODE_RIGHT)
 	{
 		index = index + 1;
-		if (index == maxIndex + 1)
+		if (index > maxIndex)
 			index = maxIndex;
 		return (index);
 	}
 	return(0);
 }
 
-static void eventMenuMain(u_int32_t *menuStep, SDL_KeyboardEvent *event, int *index)
+static void eventMenuMain(u_int32_t *menuStep, SDL_KeyboardEvent *event, u_int32_t *index)
 {
 	int newIndex;
 
@@ -99,7 +99,7 @@ static void eventMenuMain(u_int32_t *menuStep, SDL_KeyboardEvent *event, int *in
 }
 
 
-static void eventMenuNewGame(u_int32_t *menuStep, SDL_KeyboardEvent *event, int *index)
+static void eventMenuNewGame(u_int32_t *menuStep, SDL_KeyboardEvent *event, u_int32_t *index)
 {
 	int i;
 	int selection;
@@ -137,6 +137,7 @@ static void eventMenuNewGame(u_int32_t *menuStep, SDL_KeyboardEvent *event, int 
 			{
 				*menuStep = lvl;
 				*index = 0x800 + (selection << 4) + 0;
+				// printf("Index value in event %d\n", *index);
 				return ;
 			}
 			selection = i;
@@ -145,14 +146,25 @@ static void eventMenuNewGame(u_int32_t *menuStep, SDL_KeyboardEvent *event, int 
 	}
 	if (selection == -1)
 		selection = 0x08;
-	*index = i + (selection << 4) + 0x800;
+	*index = 0x800 + (selection << 4) + i;
 }
 
-static void eventMenulvl(u_int32_t *menuStep, SDL_KeyboardEvent *event, int *index)
+static void eventMenulvl(u_int32_t *menuStep, SDL_KeyboardEvent *event, u_int32_t *index)
 {
 	int		i;
+	int		selection;
+	int		shipSelection;
 
+	selection = -1;
 	i = readBits(4, *index);
+	shipSelection = readBits(4, *index >> 4);
+	if ((*index & 0x800) == 0)
+		selection = readBits(4, (*index >> 8));
+	if ((selection > -1 && event->keysym.scancode > 78 && event->keysym.scancode < 83) || selection == 3)
+	{	
+		i = selection;
+		selection = -1;
+	}
 	if (event->repeat == 0)
 	{
 		if (event->keysym.scancode == SDL_SCANCODE_ESCAPE)
@@ -167,11 +179,48 @@ static void eventMenulvl(u_int32_t *menuStep, SDL_KeyboardEvent *event, int *ind
 			i = setMenuNewGameIndex(i, SDL_SCANCODE_LEFT, 1, 3);
 		if (event->keysym.scancode == SDL_SCANCODE_RIGHT)
 			i = setMenuNewGameIndex(i, SDL_SCANCODE_RIGHT, 1, 3);
+		if (event->keysym.scancode == SDL_SCANCODE_SPACE)
+		{
+			if (selection > -1 && i == 3)
+			{
+				// printf("	VALIDATE SELECTion = %d\n", selection);
+				*menuStep = runGame;
+				*index = (selection << 8) + (shipSelection << 4) + 0;
+				return ;
+			}
+			selection = i;
+			i = 3;
+			// printf("	SELECTion = %d\n", selection);
+		}
+
 	}
-	*index = i;
+	// printf("VALUE OF SELECTION in event before leave %d\n", selection);
+	if (selection == -1)
+		selection = 0x08;
+	// printf("VALUE OF inde in event before leave %d || %d || %d || %d\n", (selection << 8) + (shipSelection << 4) + i,(selection << 8), (shipSelection << 4), i );
+	*index = (selection << 8) + (shipSelection << 4) + i;
 }
 
-void checkEventMenu(u_int32_t *menuStep, int *index)
+// static void eventInGame(u_int32_t *step, SDL_KeyboardEvent *event, u_int32_t *index)
+// {
+// 	(void)index;
+// 	if (event->repeat == 0)
+// 	{
+// 		if (event->keysym.scancode == SDL_SCANCODE_ESCAPE)
+// 			*step = quit;
+// 		if (event->keysym.scancode == SDL_SCANCODE_UP)
+// 			*step = quit;
+// 		if (event->keysym.scancode == SDL_SCANCODE_DOWN)
+// 			*step = quit;
+// 		if (event->keysym.scancode == SDL_SCANCODE_LEFT)
+// 			*step = quit;
+// 		if (event->keysym.scancode == SDL_SCANCODE_RIGHT)
+// 			*step = quit;
+// 	}
+
+// }
+
+void checkEventMenu(u_int32_t *step, u_int32_t *index)
 {
 	SDL_Event event;
 
@@ -179,14 +228,16 @@ void checkEventMenu(u_int32_t *menuStep, int *index)
 	{
 		if (event.type == SDL_KEYDOWN)
 		{
-			if (*menuStep & title)
-				eventMenuTitle(menuStep, event);
-			else if (*menuStep & mainmenu)
-				eventMenuMain(menuStep, &event.key, index);
-			else if (*menuStep & newGame)
-				eventMenuNewGame(menuStep, &event.key, index);
-			else if (*menuStep & lvl)
-				eventMenulvl(menuStep, &event.key, index);
+			if (*step & title)
+				eventMenuTitle(step, event);
+			else if (*step & mainmenu)
+				eventMenuMain(step, &event.key, index);
+			else if (*step & newGame)
+				eventMenuNewGame(step, &event.key, index);
+			else if (*step & lvl)
+				eventMenulvl(step, &event.key, index);
+			// else if (*step & 0x03)
+			// 	eventInGame(step, &event.key, index);
 			else
 				break;
 		}
@@ -208,6 +259,52 @@ void checkEventIntro(e_bool *pass)
 			else
 				break;
 		}
+		else
+			break;
+	}
+}
+
+static void keyDown(SDL_KeyboardEvent *event, t_move *direction)
+{
+    if (event->repeat == 0)
+    {
+        if (event->keysym.scancode == SDL_SCANCODE_UP)
+            direction->up = 1;
+        if (event->keysym.scancode == SDL_SCANCODE_DOWN)
+            direction->down = 1;
+        if (event->keysym.scancode == SDL_SCANCODE_LEFT)
+            direction->left = 1;
+        if (event->keysym.scancode == SDL_SCANCODE_RIGHT)
+            direction->right = 1;
+    }
+}
+
+static void keyUp(SDL_KeyboardEvent *event, t_move *direction)
+{
+    if (event->repeat == 0)
+    {
+        if (event->keysym.scancode == SDL_SCANCODE_UP)
+            direction->up = 0;
+        if (event->keysym.scancode == SDL_SCANCODE_DOWN)
+            direction->down = 0;
+        if (event->keysym.scancode == SDL_SCANCODE_LEFT)
+            direction->left = 0;
+        if (event->keysym.scancode == SDL_SCANCODE_RIGHT)
+            direction->right = 0;
+    }
+}
+
+void checkEventGame(u_int32_t *step, t_move *direction)
+{
+	(void)step;
+	SDL_Event event;
+
+	while (SDL_PollEvent(&event))
+	{
+		if (event.type == SDL_KEYDOWN)
+			keyDown(&event.key, direction);
+		else if (event.type == SDL_KEYUP)
+			keyUp(&event.key, direction);
 		else
 			break;
 	}

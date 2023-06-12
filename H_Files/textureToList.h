@@ -52,4 +52,5 @@ static const t_textureParam g_textureParam[2] = {
 
 
 t_textureToLi *newTextureLi(int indexTexture, SDL_Renderer *render);
+void cleanLiOfTexture(t_textureToLi *li);
 #endif

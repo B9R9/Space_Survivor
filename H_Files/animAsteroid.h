@@ -36,5 +36,5 @@ typedef struct s_element {
 
 e_bool animAsteroid(t_textureToLi *asteroid_t, t_element **asteroid_l,\
                     SDL_Renderer *render, int deltaTime, t_textureToLi *impact_t);
-
+void cleanLiOfElement(t_element *li);
 #endif

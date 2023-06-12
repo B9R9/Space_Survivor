@@ -27,17 +27,11 @@ enum menuPart {
 	success = 0x20,
 	aboutMe = 0x40,
 	quitM = 0x80,
-	transition = 0x100
+	transition = 0x100,
+	runGame = 0x200
 };
 
 /*STRUCT*/
-
-typedef struct s_rectCoord {
-	int x;
-	int y;
-	int w;
-	int h;
-}			t_rectCoord;
 
 typedef struct	s_menuTitle {
 	SDL_Texture 			*background;
@@ -86,10 +80,10 @@ typedef struct	s_menuParam {
 }				t_menuParam;
 
 /*Prototype*/
-e_bool	mainMenu(SDL_Renderer *render, u_int32_t *gameStep);
+e_bool	mainMenu(SDL_Renderer *render, u_int32_t *gameStep, u_int32_t *index, u_int32_t *menuStep);
 void	displayTitle(t_menuTitle *param, SDL_Renderer *render, t_timer fps, u_int32_t *menuStep);
 void	displayMain(t_menuMain *param, SDL_Renderer *render, int index);
-void	displayNewGame(t_menuNewGame *param, SDL_Renderer *render, u_int32_t *menuStep, int *index);
+void	displayNewGame(t_menuNewGame *param, SDL_Renderer *render, int index);
 void	displayLvlSelection(SDL_Renderer *render, int index);
 void	displayContainer(SDL_Renderer *render, int newIndex, int selection, int indexConfirm);
 void	setIndexAndSelection(int *newIndex, int *selection, int index, int option);

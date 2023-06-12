@@ -361,3 +361,19 @@ e_bool animAsteroid(t_textureToLi *asteroid_t, t_element **asteroid_l, SDL_Rende
 	updateRender(render, (*asteroid_l));
 	return (SUCCESS);
 }
+
+void cleanLiOfElement(t_element *li)
+{
+	t_element *toDelete;
+
+	toDelete = NULL;
+	while (li != NULL)
+	{
+		toDelete = li;
+		li = li->next;
+		toDelete->next = NULL;
+		SDL_DestroyTexture(toDelete->texture);
+		free(toDelete);
+		toDelete = NULL;
+	}
+}

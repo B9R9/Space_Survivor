@@ -76,9 +76,6 @@ static e_bool loadNewGameParam(t_menuNewGame *param, SDL_Renderer *render)
 	if (param->background == NULL)
 		return (FAIL);
 	param->rogue1 = createRect(52, 27, 5, 4);
-	// param->rogue1 = imgToTexture(ROGUE1, render);
-	// if (param->rogue1 == NULL)
-	// 	return (FAIL);
 	param->selectionShipText = createTextureFromText("Select your ship", PRSTART, 30, WHITE, render);
 	if (param->selectionShipText == NULL)
 		return (FAIL);
@@ -113,16 +110,16 @@ static e_bool loadMenu(t_menuParam *param, SDL_Renderer *render)
  * @param render : rendu
  */
 static void dispachtMenu(u_int32_t   *menuStep,SDL_Renderer *render, t_menuParam *param,\
-	t_timer fps)
+	t_timer fps, u_int32_t *index)
 {
 	if (*menuStep & title || *menuStep & transition)
 		displayTitle(&param->title, render, fps, menuStep);
 	else if (*menuStep & mainmenu)
-		displayMain(&param->main, render, param->index);
+		displayMain(&param->main, render, *index);
 	else if (*menuStep & newGame)
-		displayNewGame(&param->new, render, menuStep, &param->index);
+		displayNewGame(&param->new, render, *index);
 	else if (*menuStep & lvl)
-		displayLvlSelection(render,param->index);
+		displayLvlSelection(render, *index);
 	else if (*menuStep & option)
 		printf ("options\n");
 	else if (*menuStep & success)
@@ -131,34 +128,95 @@ static void dispachtMenu(u_int32_t   *menuStep,SDL_Renderer *render, t_menuParam
 		printf ("aboutMe\n");
 }
 
+static void updateGameStep(u_int32_t *gameStep, u_int32_t *menuStep)
+{
+	if (*menuStep & quitM)
+		*gameStep = quit;
+	if (*menuStep & runGame)
+	{
+		*gameStep = game;
+		*menuStep = mainmenu;
+	}
+}
+
+static void destroyMenuTitle(t_menuTitle title)
+{
+	SDL_DestroyTexture(title.background);
+	SDL_DestroyTexture(title.exit);
+	SDL_DestroyTexture(title.sousTitre);
+	SDL_DestroyTexture(title.titre);
+	SDL_DestroyTexture(title.titre);
+	title.timeCounter = 0;
+	cleanLiOfTexture(title.asteroid_t);
+	cleanLiOfTexture(title.impact_t);
+	cleanLiOfElement(title.asteroid_l);
+}
+
+static void destroyMenuMain_D(t_menuMain_D data)
+{
+	SDL_DestroyTexture(data.aboutMe_t);
+	SDL_DestroyTexture(data.newGame_t);
+	SDL_DestroyTexture(data.options_t);
+	SDL_DestroyTexture(data.success_t);
+}
+
+
+static void destroyMenuMain(t_menuMain data)
+{
+	SDL_DestroyTexture(data.background);
+	SDL_DestroyTexture(data.exit);
+	SDL_DestroyTexture(data.titre);
+	data.transition = FAIL;
+	destroyMenuMain_D(data.menuRed);
+	destroyMenuMain_D(data.menuYellow);
+}
+
+
+static void destroyMenuNewGame(t_menuNewGame data)
+{
+	SDL_DestroyTexture(data.background);
+	SDL_DestroyTexture(data.notAvailable);
+	SDL_DestroyTexture(data.selectionShipText);
+}
+
+
+static void cleanMenuT(t_menuParam *param)
+{
+	destroyMenuTitle(param->title);
+	destroyMenuMain(param->main);
+	destroyMenuNewGame(param->new);
+}
+
 /**
  * @brief Boucle principale pour la gestion des menus 
  * 
  * @param render : rendu
  * @param gameStep: bitflags qui suit l evolution dans le jeu 
  */
-e_bool mainMenu(SDL_Renderer *render, u_int32_t *gameStep)
+e_bool mainMenu(SDL_Renderer *render, u_int32_t *gameStep, u_int32_t *index, u_int32_t *menuStep)
 {
 	t_menuParam menuT;
 	t_timer		fps;
-	u_int32_t	menuStep;
 
-	menuStep = title;
+	*index = 0x880;
 	if (loadMenu(&menuT, render) == FAIL)
 		return (FAIL);
-	while (run(menuStep))
+	while (run(*menuStep))
 	{
 		startTimer(&fps.start);
+		checkEventMenu(menuStep, index);
+		if (*menuStep & runGame)
+			break ;
 		clearRender(render);
 		setBackground(menuT.title.background, render);
 		copyTextureInRenderWithRect(render,menuT.title.titre, createRect(5, 28, 90, 11));
-		checkEventMenu(&menuStep, &menuT.index);
-		dispachtMenu(&menuStep, render, &menuT, fps);
+		dispachtMenu(menuStep, render, &menuT, fps, index);
 		displayRender(render);
 		setDelta(&fps.delta, fps.start);
 		setDelay(fps.delta, 33);
 	}
-	if (menuStep & quitM)
-		*gameStep = quit;
+	updateGameStep(gameStep, menuStep);
+	/*Clean menuT a continuer*/
+	cleanMenuT(&menuT);
 	return (SUCCESS);
 }

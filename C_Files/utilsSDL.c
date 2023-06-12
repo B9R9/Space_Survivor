@@ -257,3 +257,14 @@ void drawContour(char *color, int alphaValue, SDL_Rect rect, SDL_Renderer *rende
 	toColor(color, alphaValue, render);
 	SDL_RenderDrawRect(render, &rect);
 }
+
+SDL_Rect defineRect(int x, int y, int w, int h)
+{
+	SDL_Rect	temp;
+
+	temp.x = x;
+	temp.y = y;
+	temp.w = w;
+	temp.h = h;
+	return (temp);
+}

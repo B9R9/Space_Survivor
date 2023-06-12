@@ -24,6 +24,7 @@ SRC_DIR = 	C_Files/
 FILES 	:=	animAsteroid.c \
 			animFondu.c \
 			event.c \
+			gameRun.c \
 			graphic.c \
 			main.c \
 			mainGame.c \
@@ -33,6 +34,7 @@ FILES 	:=	animAsteroid.c \
 			menuMain.c \
 			menuNewGame.c \
 			menuTitle.c \
+			player.c \
 			textureToList.c \
 			timer.c \
 			utils.c \

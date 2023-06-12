@@ -61,4 +61,22 @@ static const t_spaceShipData g_spaceShipArr [6] = {
 		.color = GREEN
 	},
 };
+
+/*LVLData*/
+
+typedef struct s_lvlData {
+	char *backgroundPath;
+}		t_lvlData;
+
+static const t_lvlData g_LvlData [3] = {
+	{
+		.backgroundPath = "/Users/flagada/Desktop/v2/01-Asset/texture/Space Background.png"
+	},
+	{
+		.backgroundPath = "/Users/flagada/Desktop/v2/01-Asset/texture/Space Background.png"
+	},
+	{
+		.backgroundPath = "/Users/flagada/Desktop/v2/01-Asset/texture/Space Background.png"
+	}
+};
 #endif

@@ -119,3 +119,21 @@ t_textureToLi *newTextureLi(int indexTexture, SDL_Renderer *render)
 	SDL_DestroyTexture(spriteSheet);
 	return (li);
 }
+
+void cleanLiOfTexture(t_textureToLi *li)
+{
+	t_textureToLi *toDelete;
+
+	toDelete = NULL;
+	while (li != NULL)
+	{
+		toDelete = li;
+		li = li->next;
+		toDelete->next = NULL;
+		toDelete->id = 0;
+		toDelete->sizeLi = 0;
+		SDL_DestroyTexture(toDelete->texture);
+		free(toDelete);
+		toDelete = NULL;
+	}
+}

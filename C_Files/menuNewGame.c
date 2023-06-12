@@ -51,17 +51,6 @@ static SDL_Rect	nextUnits(SDL_Rect units, int *loop)
 	return (units);
 }
 
-static SDL_Rect defineRect(int x, int y, int w, int h)
-{
-	SDL_Rect	temp;
-
-	temp.x = x;
-	temp.y = y;
-	temp.w = w;
-	temp.h = h;
-	return (temp);
-}
-
 static void backgroundAnimation(int newIndex, int max, SDL_Rect units, SDL_Renderer *render, SDL_Texture *texture)
 {
 	int 		startIndex;
@@ -135,14 +124,13 @@ void setIndexAndSelection(int *newIndex, int *selection, int index, int option)
 			*selection = readBits(4, (index >> 8));
 }
 
-void displayNewGame(t_menuNewGame *param, SDL_Renderer *render, u_int32_t *menuStep, int *index)
+void displayNewGame(t_menuNewGame *param, SDL_Renderer *render, int index)
 {
-	(void)menuStep;
 	int selection;
 	int newIndex;
 	
 	SDL_SetRenderDrawBlendMode(render, SDL_BLENDMODE_BLEND);
-	setIndexAndSelection(&newIndex, &selection, *index, 0);
+	setIndexAndSelection(&newIndex, &selection, index, 0);
 	displayContainer(render, newIndex, selection, 6);
 	displayUnits(render,newIndex, selection, param->background);
 }

@@ -13,6 +13,7 @@ Description et purpose du fichier
 
 /*include Game*/
 #include "mainMenu.h"
+#include "gameRun.h"
 #include "param.h"
 
 /*Prototype*/

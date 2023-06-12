@@ -45,13 +45,15 @@ void	displayLvlSelection(SDL_Renderer *render, int index)
 {
 	int lvlSelection;
 	int newIndex;
-	/* NEED TO FIX
-	index value is a problem= lvlSelection shoud be == -1*/
-
 
 	SDL_SetRenderDrawBlendMode(render, SDL_BLENDMODE_BLEND);
 	setIndexAndSelection(&newIndex, &lvlSelection, index, 1);
-	printf("index = %d || selection %d\n", index, lvlSelection);
+	printf("*******************************************\n");
+	printf("LVL SECTION: Your ship is %d \n", readBits(4, (index >> 4)));
+	printf("LVL SECTION: Your selection is %d \n", lvlSelection);
+	printf("LVL SECTION: Your newindex(1) is %d \n", readBits(4, index));
+	printf("LVL SECTION: Your newIndex is %d \n", newIndex);
+	printf("LVL SECTION: Your Index is %d \n", index);
 	displayContainer(render, newIndex, lvlSelection, 3);
 	displayLvlUnits(render, newIndex, lvlSelection);
 }

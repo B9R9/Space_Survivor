@@ -16,9 +16,11 @@ void errPrint(const char *location, const char *error)
  * @param gameSteps: bitflags pour suivre les etapes du jeu
  * @return e_bool: a boolean
  */
-e_bool run(u_int32_t gameSteps)
+e_bool run(u_int32_t menuSteps)
 {
-	if (gameSteps & 0x80)
+	if (menuSteps & 0x80)
+		return (FALSE);
+	if (menuSteps & 0x200)
 		return (FALSE);
 	return (TRUE);
 }
